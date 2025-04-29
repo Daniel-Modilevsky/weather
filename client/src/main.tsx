@@ -7,6 +7,7 @@ import { CssBaseline } from "@mui/material";
 import theme from "./theme.ts";
 import { ThemeProvider as MUIThemeProvider } from "@mui/material/styles";
 import { ThemeProvider as StyledThemeProvider } from "styled-components";
+import { SnackbarProvider } from "./context/SnackbarContext";
 
 const queryClient = new QueryClient();
 
@@ -16,7 +17,9 @@ createRoot(document.getElementById("root")!).render(
       <MUIThemeProvider theme={theme}>
         <StyledThemeProvider theme={theme}>
           <CssBaseline />
-          <App />
+          <SnackbarProvider>
+            <App />
+          </SnackbarProvider>
         </StyledThemeProvider>
       </MUIThemeProvider>{" "}
     </QueryClientProvider>
