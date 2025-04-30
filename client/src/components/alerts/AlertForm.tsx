@@ -1,7 +1,6 @@
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { CardHeader, TextField, Button, MenuItem, Slider } from "@mui/material";
-import { AlertFormErrors } from "../../types/alert";
+import { AlertFormErrors, Alert, AlertFormParameters } from "../../types/alert";
 import {
   FormCard,
   FormFooter,
@@ -9,7 +8,6 @@ import {
   FormWrapper,
   SliderLabel,
 } from "./AlertForm.styles";
-import { useAlerts } from "../../hooks/useAlerts";
 
 const PARAMETERS = [
   { value: "temperature", label: "Temperature", unit: "°C", min: -30, max: 50 },
@@ -24,25 +22,44 @@ const CONDITIONS = [
   { value: "equals", label: "Equals" },
 ];
 
-type AlertFormProp = {
-  onSuccess: () => void;
+type AlertFormProps = {
+  onSuccess: (formData: AlertFormParameters) => void;
   onCancel: () => void;
+  initialData?: Alert;
 };
 
-export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
-  const { addAlert } = useAlerts();
-
-  const [formData, setFormData] = useState({
+export default function AlertForm({
+  onSuccess,
+  onCancel,
+  initialData,
+}: AlertFormProps) {
+  const [formData, setFormData] = useState<AlertFormParameters>({
     name: "",
     location: "",
     parameter: "",
     condition: "greaterThan",
     threshold: 20,
+    latitude: 0,
+    longitude: 0,
   });
 
   const [errors, setErrors] = useState<AlertFormErrors>({});
 
   const selectedParam = PARAMETERS.find((p) => p.value === formData.parameter);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        name: initialData.name,
+        location: initialData.location,
+        parameter: initialData.parameter,
+        condition: initialData.condition,
+        threshold: initialData.threshold,
+        latitude: 0,
+        longitude: 0,
+      });
+    }
+  }, [initialData]);
 
   const handleChange = (key: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
@@ -60,40 +77,27 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate() || !formData) {
-      return;
-    }
-    const unit =
-      PARAMETERS.find((p) => p.value === formData.parameter)?.unit || "";
+    if (!validate()) return;
 
-    addAlert({
-      ...formData,
-      unit,
-      isTriggered: false,
-      latitude: 0,
-      longitude: 0,
-    });
-    onSuccess();
+    onSuccess(formData);
   };
 
   return (
     <FormWrapper>
       <FormCard>
         <CardHeader
-          title="Create New Weather Alert"
+          title={initialData ? "Edit Alert" : "Create New Weather Alert"}
           sx={{
             background: "linear-gradient(to right, #e0ecff, #f1f5ff)",
             paddingBottom: 2,
             marginBottom: 2,
           }}
         />
-
         <form onSubmit={handleSubmit}>
           <FormRow>
             <TextField
               fullWidth
               label="Alert Name"
-              placeholder="E.g., High Temperature Alert"
               value={formData.name}
               onChange={(e) => handleChange("name", e.target.value)}
               error={!!errors.name}
@@ -105,7 +109,6 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
             <TextField
               fullWidth
               label="Location"
-              placeholder="Search locations..."
               value={formData.location}
               onChange={(e) => handleChange("location", e.target.value)}
               error={!!errors.location}
@@ -119,13 +122,13 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
               label="Weather Parameter"
               value={formData.parameter}
               onChange={(e) => {
-                const selected = PARAMETERS.find(
+                const param = PARAMETERS.find(
                   (p) => p.value === e.target.value
                 );
                 handleChange("parameter", e.target.value);
                 handleChange(
                   "threshold",
-                  selected ? (selected.min + selected.max) / 2 : 0
+                  param ? (param.min + param.max) / 2 : 0
                 );
               }}
               fullWidth
@@ -137,7 +140,6 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
                 </MenuItem>
               ))}
             </TextField>
-
             <TextField
               select
               label="Condition"
@@ -196,7 +198,7 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
               Cancel
             </Button>
             <Button type="submit" variant="contained">
-              Create Alert
+              {initialData ? "Update Alert" : "Create Alert"}
             </Button>
           </FormFooter>
         </form>

@@ -47,8 +47,6 @@ export type AlertFormParameters = {
   parameter: string;
   condition: string;
   threshold: number;
-  unit: string;
-  isTriggered: boolean;
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
 };

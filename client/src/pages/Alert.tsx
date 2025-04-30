@@ -24,22 +24,46 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useState } from "react";
 import AlertForm from "../components/alerts/AlertForm";
 import { useSnackbar } from "../hooks/useSnackBar";
-import { Alert } from "../types/alert";
+import { Alert, AlertFormParameters } from "../types/alert";
 import ConfirmDialog from "../components/common/ConfirmDialog";
 import { PageWrapper, SectionHeader } from "./styles/Alert.styles";
 
 export function AlertsPage() {
-  const { alerts, removeAlert, editAlert } = useAlerts();
-  const [showModal, setShowModal] = useState(false);
+  const { alerts, addAlert, editAlert, removeAlert } = useAlerts();
   const { showSnackbar } = useSnackbar();
-  const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
 
-  const handleAlertCreated = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null); // 💡 Local state
+
+  const handleCloseModal = () => {
     setShowModal(false);
-    showSnackbar({
-      message: "Alert created successfully!",
-      severity: "success",
-    });
+    setSelectedAlert(null);
+  };
+
+  const handleSubmit = (formData: AlertFormParameters) => {
+    if (selectedAlert) {
+      editAlert({
+        id: selectedAlert.id,
+        data: {
+          ...formData,
+          updatedAt: new Date().toISOString(),
+        },
+      });
+
+      showSnackbar({
+        message: "Alert updated successfully!",
+        severity: "success",
+      });
+    } else {
+      addAlert(formData);
+      showSnackbar({
+        message: "Alert created successfully!",
+        severity: "success",
+      });
+    }
+
+    handleCloseModal();
   };
 
   return (
@@ -48,7 +72,13 @@ export function AlertsPage() {
         <Typography variant="h5" fontWeight={600}>
           Alerts
         </Typography>
-        <Button variant="contained" onClick={() => setShowModal(true)}>
+        <Button
+          variant="contained"
+          onClick={() => {
+            setSelectedAlert(null);
+            setShowModal(true);
+          }}
+        >
           Create Alert
         </Button>
       </SectionHeader>
@@ -98,7 +128,13 @@ export function AlertsPage() {
                     <IconButton size="small">
                       <VisibilityIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSelectedAlert(alert);
+                        setShowModal(true);
+                      }}
+                    >
                       <EditIcon fontSize="small" />
                     </IconButton>
                     <IconButton
@@ -115,21 +151,26 @@ export function AlertsPage() {
         </Table>
       </TableContainer>
 
-      {/* Modal for creating alert */}
+      {/* Shared modal for both Create & Edit */}
       <Dialog
         open={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={handleCloseModal}
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>Create New Weather Alert</DialogTitle>
+        <DialogTitle>
+          {selectedAlert ? "Edit Alert" : "Create New Weather Alert"}
+        </DialogTitle>
         <DialogContent>
           <AlertForm
-            onSuccess={handleAlertCreated}
-            onCancel={() => setShowModal(false)}
+            initialData={selectedAlert || undefined}
+            onSuccess={handleSubmit}
+            onCancel={handleCloseModal}
           />
         </DialogContent>
       </Dialog>
+
+      {/* Confirm delete */}
       <ConfirmDialog
         open={!!alertToDelete}
         message={`Are you sure you want to delete the alert "${alertToDelete?.name}"?`}
