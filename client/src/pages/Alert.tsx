@@ -1,4 +1,4 @@
-import { useMockAlerts } from "../hooks/useMockAlerts";
+import { useAlerts } from "../hooks/useAlerts";
 import {
   TableContainer,
   StyledTableCell,
@@ -21,40 +21,25 @@ import {
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import styled from "styled-components";
 import { useState } from "react";
 import AlertForm from "../components/alerts/AlertForm";
-import { useQueryClient } from "@tanstack/react-query";
 import { useSnackbar } from "../hooks/useSnackBar";
-import { AlertFormParameters } from "../types/alert";
-
-const PageWrapper = styled.div`
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-`;
-
-const SectionHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-`;
+import { Alert } from "../types/alert";
+import ConfirmDialog from "../components/common/ConfirmDialog";
+import { PageWrapper, SectionHeader } from "./styles/Alert.styles";
 
 export function AlertsPage() {
-  const { data: alerts = [] } = useMockAlerts();
+  const { alerts, removeAlert, editAlert } = useAlerts();
   const [showModal, setShowModal] = useState(false);
-  const queryClient = useQueryClient();
   const { showSnackbar } = useSnackbar();
+  const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
 
-  const handleAlertCreated = (formData: AlertFormParameters) => {
-    console.log(formData);
+  const handleAlertCreated = () => {
     setShowModal(false);
     showSnackbar({
       message: "Alert created successfully!",
       severity: "success",
     });
-    queryClient.invalidateQueries({ queryKey: ["alerts"] });
   };
 
   return (
@@ -82,6 +67,15 @@ export function AlertsPage() {
             </TableRow>
           </TableHead>
           <TableBody>
+            {alerts.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} align="center">
+                  <Typography variant="body1" color="text.secondary">
+                    No alerts found. Create your first weather alert.
+                  </Typography>
+                </TableCell>
+              </TableRow>
+            )}
             {alerts.map((alert) => (
               <TableRow key={alert.id}>
                 <TableCell>{alert.name}</TableCell>
@@ -107,7 +101,10 @@ export function AlertsPage() {
                     <IconButton size="small">
                       <EditIcon fontSize="small" />
                     </IconButton>
-                    <IconButton size="small">
+                    <IconButton
+                      size="small"
+                      onClick={() => setAlertToDelete(alert)}
+                    >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
                   </ActionButtonContainer>
@@ -133,6 +130,21 @@ export function AlertsPage() {
           />
         </DialogContent>
       </Dialog>
+      <ConfirmDialog
+        open={!!alertToDelete}
+        message={`Are you sure you want to delete the alert "${alertToDelete?.name}"?`}
+        onCancel={() => setAlertToDelete(null)}
+        onConfirm={() => {
+          if (alertToDelete) {
+            removeAlert(alertToDelete.id);
+            showSnackbar({
+              message: "Alert deleted successfully",
+              severity: "success",
+            });
+            setAlertToDelete(null);
+          }
+        }}
+      />
     </PageWrapper>
   );
 }

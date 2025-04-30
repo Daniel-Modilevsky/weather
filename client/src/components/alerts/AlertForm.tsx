@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { CardHeader, TextField, Button, MenuItem, Slider } from "@mui/material";
-import { AlertFormErrors, AlertFormParameters } from "../../types/alert";
+import { AlertFormErrors } from "../../types/alert";
 import {
   FormCard,
   FormFooter,
@@ -9,6 +9,8 @@ import {
   FormWrapper,
   SliderLabel,
 } from "./AlertForm.styles";
+import { useAlerts } from "../../hooks/useAlerts";
+
 const PARAMETERS = [
   { value: "temperature", label: "Temperature", unit: "°C", min: -30, max: 50 },
   { value: "humidity", label: "Humidity", unit: "%", min: 0, max: 100 },
@@ -23,11 +25,13 @@ const CONDITIONS = [
 ];
 
 type AlertFormProp = {
-  onSuccess: (formData: AlertFormParameters) => void;
+  onSuccess: () => void;
   onCancel: () => void;
 };
 
 export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
+  const { addAlert } = useAlerts();
+
   const [formData, setFormData] = useState({
     name: "",
     location: "",
@@ -59,9 +63,17 @@ export default function AlertForm({ onSuccess, onCancel }: AlertFormProp) {
     if (!validate() || !formData) {
       return;
     }
+    const unit =
+      PARAMETERS.find((p) => p.value === formData.parameter)?.unit || "";
 
-    console.log("Submit alert:", formData);
-    onSuccess(formData);
+    addAlert({
+      ...formData,
+      unit,
+      isTriggered: false,
+      latitude: 0,
+      longitude: 0,
+    });
+    onSuccess();
   };
 
   return (

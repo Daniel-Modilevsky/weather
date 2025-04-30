@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { mockWeather } from "../mcoks/weather";
+import { mockWeather } from "../mocks/weather";
 
 export const useMockWeather = () => {
   return useQuery({

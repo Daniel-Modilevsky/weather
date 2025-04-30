@@ -7,13 +7,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useMockWeather } from "../hooks/useMockWeather";
-import { useMockAlerts } from "../hooks/useMockAlerts";
+import { useAlerts } from "../hooks/useAlerts";
 import {
   PageContainer,
   SectionHeader,
   AnimatedWarningIcon,
   LoaderContainer,
-} from "./Home.styles";
+} from "./styles/Home.styles";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import ThunderstormIcon from "@mui/icons-material/Thunderstorm";
 import CloudIcon from "@mui/icons-material/Cloud";
@@ -22,7 +22,7 @@ import WarningIcon from "@mui/icons-material/Warning";
 
 export function HomePage() {
   const { data: weather, isLoading: isWeatherLoading } = useMockWeather();
-  const { data: alerts, isLoading: isAlertsLoading } = useMockAlerts();
+  const { alerts, isLoading: isAlertsLoading } = useAlerts();
 
   if (isWeatherLoading || isAlertsLoading) {
     return (

@@ -8,27 +8,30 @@ export type AlertParameter =
   | "uvIndex"
   | "visibility";
 
-export type AlertState = "clear" | "triggered" | "cleared" | "disabled";
+export type AlertState =
+  | "clear"
+  | "triggered"
+  | "cleared"
+  | "disabled"
+  | "active";
 
-export interface Alert {
+export type Alert = {
   id: string;
   name: string;
   location: string;
   latitude: number;
   longitude: number;
-  parameter: AlertParameter;
-  condition: AlertCondition;
+  parameter: string;
+  condition: string;
   threshold: number;
   unit: string;
-
-  state: AlertState;
   isTriggered: boolean;
-
+  state: AlertState;
   createdAt: string;
-  triggeredAt?: string;
-  clearedAt?: string;
+  updatedAt: string;
+  clearedAt: string | null;
   lastChecked: string;
-}
+};
 
 export type AlertFormErrors = {
   name?: string;
@@ -44,4 +47,8 @@ export type AlertFormParameters = {
   parameter: string;
   condition: string;
   threshold: number;
+  unit: string;
+  isTriggered: boolean;
+  latitude?: number;
+  longitude?: number;
 };
