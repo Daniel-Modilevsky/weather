@@ -17,12 +17,3 @@ export type Alert = {
   clearedAt: string | null;
   lastChecked: string;
 };
-
-export type AlertInput = {
-  condition: "greater_than" | "less_than" | "equal_to";
-  threshold: number;
-  name: string;
-  latitude: number;
-  longitude: number;
-  parameter: string;
-};

@@ -5,7 +5,7 @@ const QUEUE = "evaluate_alerts";
 
 export async function startConsumer() {
   const conn = await amqp.connect(
-    process.env.RABBITMQ_URL || "amqp://localhost"
+    process.env.RABBITMQ_URL || "amqp://localhost:5672"
   );
   const channel = await conn.createChannel();
 

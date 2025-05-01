@@ -1,0 +1,6 @@
+[2025-05-01T16:02:25.708Z] [INFO] Worker is listening on queue: evaluate_alerts
+[2025-05-01T16:14:12.893Z] [INFO] Evaluating alert: Daniel (f0e40a7c-9f25-499e-a1e4-549c4d385ea7)
+[2025-05-01T16:14:13.419Z] [ERROR]  Evaluation failed: Request failed with status code 401
+[2025-05-01T16:19:07.792Z] [INFO] Worker is listening on queue: evaluate_alerts
+[2025-05-01T16:19:11.595Z] [INFO] Evaluating alert: Daniel (f0e40a7c-9f25-499e-a1e4-549c4d385ea7)
+[2025-05-01T16:19:12.123Z] [INFO] Evaluation done: windSpeed = 1.7, threshold greater_than 100 → CLEAR

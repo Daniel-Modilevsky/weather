@@ -7,6 +7,8 @@ import logger from "./lib/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFoundHandler";
 import { initAlertProducer } from "./queues/alertProducer";
+import cron from "node-cron";
+import axios from "axios";
 
 dotenv.config();
 
@@ -30,6 +32,21 @@ async function startServer() {
 
   app.listen(PORT, () => {
     logger.info(`Server is running on http://localhost:${PORT}`);
+  });
+}
+if (process.env.ENABLE_CRON === "true") {
+  cron.schedule("*/10 * * * *", async () => {
+    logger.info("⏰ Running scheduled alert check (every 10 min)");
+    try {
+      const res = await axios.post(
+        "http://localhost:3001/api/alerts/check-all"
+      );
+      logger.info(
+        `Alert check completed: ${res.data.published}/${res.data.total} published`
+      );
+    } catch (err) {
+      logger.error("Failed to run scheduled alert check", err);
+    }
   });
 }
 
