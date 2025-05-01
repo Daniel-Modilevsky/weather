@@ -11,3 +11,15 @@ export interface Weather {
   lastChecked: string;
   localTime: string;
 }
+
+export type CurrentWeather = {
+  temperature: number;
+  temperatureUnit: string;
+  humidity: number;
+  windSpeed: number;
+  windSpeedUnit: string;
+  precipitationProbability: number;
+  visibility: number;
+  weatherCode: number;
+  lastChecked?: string;
+};

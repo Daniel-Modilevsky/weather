@@ -6,8 +6,10 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import { useMockWeather } from "../hooks/useMockWeather";
+import { useState } from "react";
 import { useAlerts } from "../hooks/useAlerts";
+import { useCurrentWeather } from "../hooks/useCurrentWeather";
+import { LocationSearch } from "../components/weather/LocationSearch";
 import {
   PageContainer,
   SectionHeader,
@@ -19,10 +21,16 @@ import ThunderstormIcon from "@mui/icons-material/Thunderstorm";
 import CloudIcon from "@mui/icons-material/Cloud";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import WarningIcon from "@mui/icons-material/Warning";
+import { useNavigate } from "react-router-dom";
 
 export function HomePage() {
-  const { data: weather, isLoading: isWeatherLoading } = useMockWeather();
+  const [locationName, setLocationName] = useState("Tel Aviv");
+
+  const { data: weather, isLoading: isWeatherLoading } =
+    useCurrentWeather(locationName);
+
   const { alerts, isLoading: isAlertsLoading } = useAlerts();
+  const navigate = useNavigate();
 
   if (isWeatherLoading || isAlertsLoading) {
     return (
@@ -60,20 +68,29 @@ export function HomePage() {
 
   return (
     <PageContainer>
-      {/* Weather Section */}
       <SectionHeader>
         <Typography variant="h5" fontWeight={600}>
           Current Weather
         </Typography>
-        <Button variant="outlined" size="small">
-          Refresh
-        </Button>
+
+        <LocationSearch
+          onSearch={(newLocation) => setLocationName(newLocation)}
+        />
+
+        <Typography variant="body2" color="text.secondary" gutterBottom>
+          Location: {locationName}
+        </Typography>
+
+        <Typography variant="caption" color="text.secondary" mt={1}>
+          Last updated: {new Date().toLocaleTimeString()}
+        </Typography>
       </SectionHeader>
 
       <Card>
         <CardContent>
           <Box display="flex" alignItems="center" gap={2}>
-            {weather?.weatherCode && getWeatherIcon(weather.weatherCode)}
+            {weather?.weatherCode &&
+              getWeatherIcon(weather.weatherCode.toString())}
             <Typography variant="h6" gutterBottom>
               {weather?.temperature} {weather?.temperatureUnit}
             </Typography>
@@ -83,7 +100,6 @@ export function HomePage() {
             {weather?.weatherCode}
           </Typography>
 
-          {/* Last updated info */}
           <Typography variant="caption" color="text.secondary">
             Last updated: {getLastUpdatedText(weather?.lastChecked)}
           </Typography>
@@ -124,12 +140,16 @@ export function HomePage() {
         </CardContent>
       </Card>
 
-      {/* Alerts Section */}
       <SectionHeader style={{ marginTop: "2rem" }}>
         <Typography variant="h5" fontWeight={600}>
           Your Alerts
         </Typography>
-        <Button variant="contained" size="small" color="primary">
+        <Button
+          variant="contained"
+          size="small"
+          color="primary"
+          onClick={() => navigate("/alerts")}
+        >
           Manage Alerts
         </Button>
       </SectionHeader>

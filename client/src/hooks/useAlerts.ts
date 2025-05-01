@@ -1,81 +1,67 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, AlertFormParameters } from "../types/alert";
-import { v4 as uuidv4 } from "uuid";
-import { mockAlerts } from "../mocks/alerts";
-
-let alerts: Alert[] = [...mockAlerts];
 
 export function useAlerts() {
   const queryClient = useQueryClient();
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
+  // Fetch alerts from the backend
   const {
-    data: alertsData = [],
+    data: alerts = [],
     isLoading,
     error,
   } = useQuery<Alert[]>({
     queryKey: ["alerts"],
-    queryFn: () => Promise.resolve([...alerts]),
+    queryFn: async () => {
+      const res = await fetch("http://localhost:3001/api/alerts");
+      if (!res.ok) throw new Error("Failed to fetch alerts");
+      return res.json();
+    },
   });
 
+  // POST /api/alerts
   const createAlert = useMutation({
-    mutationFn: (data: AlertFormParameters) => {
-      const unit =
-        {
-          temperature: "°C",
-          humidity: "%",
-          windSpeed: "km/h",
-          visibility: "km",
-        }[data.parameter] || "";
-
-      const newAlert: Alert = {
-        id: uuidv4(),
-        ...data,
-        unit,
-        latitude: 0,
-        longitude: 0,
-        isTriggered: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        clearedAt: null,
-        state: "active",
-        lastChecked: new Date().toISOString(),
-      };
-
-      alerts.push(newAlert);
-      return Promise.resolve(newAlert);
+    mutationFn: async (data: AlertFormParameters) => {
+      const res = await fetch("http://localhost:3001/api/alerts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to create alert");
+      return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
+  // PUT /api/alerts/:id
   const updateAlert = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<Alert> }) => {
-      const index = alerts.findIndex((a) => a.id === id);
-      if (index === -1) return Promise.resolve(null);
-
-      alerts[index] = {
-        ...alerts[index],
-        ...data,
-        updatedAt: new Date().toISOString(),
-      };
-
-      return Promise.resolve(alerts[index]);
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Alert> }) => {
+      const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to update alert");
+      return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
+  // DELETE /api/alerts/:id
   const deleteAlert = useMutation({
-    mutationFn: (id: string) => {
-      const prevLength = alerts.length;
-      alerts = alerts.filter((a) => a.id !== id);
-      return Promise.resolve(alerts.length < prevLength);
+    mutationFn: async (id: string) => {
+      const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Failed to delete alert");
+      return res.json();
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
   });
 
   return {
-    alerts: alertsData,
+    alerts,
     isLoading,
     error,
     selectedAlert,
