@@ -1,17 +1,15 @@
 import { Router } from "express";
 import { fetchWeatherByName } from "../services/tommorow";
-import axios from "axios";
+import logger from "../lib/logger";
+import { WeatherQuerySchema } from "../schemas/weatherSchema";
 
 const router = Router();
 
-router.get("/", async (req: any, res: any) => {
-  const { location } = req.query;
-
-  if (!location) {
-    return res.status(400).json({ error: "Missing location query param" });
-  }
-
+router.get("/", async (req, res, next) => {
   try {
+    const { location } = WeatherQuerySchema.parse(req.query);
+
+    logger.info(`Fetching weather for location: ${location}`);
     const data = await fetchWeatherByName(location);
 
     const result = {
@@ -28,8 +26,8 @@ router.get("/", async (req: any, res: any) => {
 
     res.json(result);
   } catch (err) {
-    console.error("🌩️ Weather API error:", err);
-    res.status(500).json({ error: "Failed to fetch weather" });
+    logger.error("🌩️ Weather API error:", err);
+    next(err);
   }
 });
 

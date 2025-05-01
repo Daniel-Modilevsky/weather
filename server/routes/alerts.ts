@@ -5,7 +5,7 @@ import {
   updateAlert,
   deleteAlert,
 } from "../controllers/alerts";
-import { AlertInput } from "../types/alert";
+import { AlertInputSchema } from "../schemas/alert";
 
 const router: Router = Router();
 
@@ -16,8 +16,8 @@ router.get("/", (_req: Request, res: Response) => {
 
 router.post("/", (req: Request, res: Response) => {
   try {
-    const input: AlertInput = req.body;
-    const newAlert = createAlert(input);
+    const parsed = AlertInputSchema.parse(req.body);
+    const newAlert = createAlert(parsed);
     res.status(201).json(newAlert);
   } catch (error) {
     res.status(400).json({ error: "Invalid alert data" });

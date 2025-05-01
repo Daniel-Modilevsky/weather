@@ -18,13 +18,18 @@ export type Alert = {
   lastChecked: string;
 };
 
-export type AlertInput = Omit<
-  Alert,
-  | "id"
-  | "createdAt"
-  | "updatedAt"
-  | "clearedAt"
-  | "state"
-  | "lastChecked"
-  | "isTriggered"
->;
+export type AlertInput = {
+  title: string;
+  metric:
+    | "temperature"
+    | "humidity"
+    | "windSpeed"
+    | "precipitationProbability"
+    | "visibility";
+  condition: "greater_than" | "less_than" | "equal_to";
+  threshold: number;
+  name: string;
+  latitude: number;
+  longitude: number;
+  parameter: string;
+};

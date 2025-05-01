@@ -8,7 +8,13 @@ export const getAlerts = (): Alert[] => alerts;
 export const createAlert = (input: AlertInput): Alert => {
   const newAlert: Alert = {
     id: uuidv4(),
-    ...input,
+    name: input.name,
+    location: input.name,
+    latitude: input.latitude,
+    longitude: input.longitude,
+    parameter: input.parameter,
+    condition: input.condition,
+    threshold: input.threshold,
     unit: getUnitForParameter(input.parameter),
     isTriggered: false,
     state: "active",

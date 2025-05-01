@@ -1,5 +1,6 @@
 import axios from "axios";
 import { redis } from "./redis";
+import logger from "../lib/logger";
 
 const BASE_URL = "https://api.tomorrow.io/v4";
 const REAL_TIME_URL = `${BASE_URL}/weather/realtime`;
@@ -26,7 +27,7 @@ export async function fetchWeatherByName(locationName: string) {
 
     return values;
   } catch (err) {
-    console.error("🌩️ Weather API error:", err);
+    logger.error("🌩️ Weather API error:", err);
     throw new Error("Failed to fetch weather by name");
   }
 }
