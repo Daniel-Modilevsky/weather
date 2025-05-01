@@ -6,7 +6,9 @@ import logger from "./lib/logger";
 dotenv.config();
 
 async function startWorker() {
-  const conn = await amqp.connect("amqp://localhost");
+  const conn = await amqp.connect(
+    process.env.RABBITMQ_URL || "amqp://localhost"
+  );
   const channel = await conn.createChannel();
 
   const QUEUE_NAME = "evaluate_alerts";

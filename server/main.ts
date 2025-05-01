@@ -12,34 +12,34 @@ import axios from "axios";
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3001;
+const app = express();
+const port = process.env.PORT || 3000;
 
-  app.use(cors());
-  app.use(express.json());
+app.use(cors());
+app.use(express.json());
 
-  app.use("/api/alerts", alertsRoutes);
-  app.use("/api/weather", weatherRoutes);
-  app.get("/health", (_, res) => {
-    res.json({ status: "ok" });
-  });
+app.use("/api/alerts", alertsRoutes);
+app.use("/api/weather", weatherRoutes);
 
-  app.use(notFoundHandler);
-  app.use(errorHandler);
+// Initialize RabbitMQ producer
+initAlertProducer().catch((err: Error) => {
+  logger.error("Failed to initialize RabbitMQ producer", err);
+  process.exit(1);
+});
 
-  await initAlertProducer();
+app.get("/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
-  app.listen(PORT, () => {
-    logger.info(`Server is running on http://localhost:${PORT}`);
-  });
-}
+app.use(notFoundHandler);
+app.use(errorHandler);
+
 if (process.env.ENABLE_CRON === "true") {
   cron.schedule("*/10 * * * *", async () => {
     logger.info("⏰ Running scheduled alert check (every 10 min)");
     try {
       const res = await axios.post(
-        "http://localhost:3001/api/alerts/check-all"
+        `http://localhost:${port}/api/alerts/check-all`
       );
       logger.info(
         `Alert check completed: ${res.data.published}/${res.data.total} published`
@@ -50,6 +50,6 @@ if (process.env.ENABLE_CRON === "true") {
   });
 }
 
-startServer().catch((err) => {
-  logger.error("Failed to start server", err);
+app.listen(port, () => {
+  logger.info(`Server is running on port ${port}`);
 });

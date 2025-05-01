@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, AlertFormParameters } from "../types/alert";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../config/api";
 
 export function useAlerts() {
   const queryClient = useQueryClient();
@@ -15,7 +16,7 @@ export function useAlerts() {
   } = useQuery<Alert[]>({
     queryKey: ["alerts"],
     queryFn: async () => {
-      const res = await fetch("http://localhost:3001/api/alerts");
+      const res = await fetch(`${API_BASE_URL}/api/alerts`);
       if (!res.ok) throw new Error("Failed to fetch alerts");
       return res.json();
     },
@@ -23,7 +24,7 @@ export function useAlerts() {
 
   const createAlert = useMutation({
     mutationFn: async (data: AlertFormParameters) => {
-      const res = await fetch("http://localhost:3001/api/alerts", {
+      const res = await fetch(`${API_BASE_URL}/api/alerts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -42,7 +43,7 @@ export function useAlerts() {
 
   const updateAlert = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Alert> }) => {
-      const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/alerts/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -61,7 +62,7 @@ export function useAlerts() {
 
   const deleteAlert = useMutation({
     mutationFn: async (id: string) => {
-      const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/alerts/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete alert");
