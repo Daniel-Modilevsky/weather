@@ -151,7 +151,6 @@ export function AlertsPage() {
         </Table>
       </TableContainer>
 
-      {/* Shared modal for both Create & Edit */}
       <Dialog
         open={showModal}
         onClose={handleCloseModal}
@@ -170,7 +169,6 @@ export function AlertsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Confirm delete */}
       <ConfirmDialog
         open={!!alertToDelete}
         message={`Are you sure you want to delete the alert "${alertToDelete?.name}"?`}

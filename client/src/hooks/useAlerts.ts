@@ -1,16 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Alert, AlertFormParameters } from "../types/alert";
+import { toast } from "react-toastify";
 
 export function useAlerts() {
   const queryClient = useQueryClient();
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
-  // Fetch alerts from the backend
   const {
     data: alerts = [],
     isLoading,
     error,
+    refetch,
   } = useQuery<Alert[]>({
     queryKey: ["alerts"],
     queryFn: async () => {
@@ -20,7 +21,6 @@ export function useAlerts() {
     },
   });
 
-  // POST /api/alerts
   const createAlert = useMutation({
     mutationFn: async (data: AlertFormParameters) => {
       const res = await fetch("http://localhost:3001/api/alerts", {
@@ -31,10 +31,15 @@ export function useAlerts() {
       if (!res.ok) throw new Error("Failed to create alert");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      toast.success("Alert created successfully");
+    },
+    onError: () => {
+      toast.error("Failed to create alert");
+    },
   });
 
-  // PUT /api/alerts/:id
   const updateAlert = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<Alert> }) => {
       const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
@@ -45,10 +50,15 @@ export function useAlerts() {
       if (!res.ok) throw new Error("Failed to update alert");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      toast.success("Alert updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update alert");
+    },
   });
 
-  // DELETE /api/alerts/:id
   const deleteAlert = useMutation({
     mutationFn: async (id: string) => {
       const res = await fetch(`http://localhost:3001/api/alerts/${id}`, {
@@ -57,7 +67,13 @@ export function useAlerts() {
       if (!res.ok) throw new Error("Failed to delete alert");
       return res.json();
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["alerts"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["alerts"] });
+      toast.success("Alert deleted successfully");
+    },
+    onError: () => {
+      toast.error("Failed to delete alert");
+    },
   });
 
   return {
@@ -69,5 +85,6 @@ export function useAlerts() {
     addAlert: createAlert.mutate,
     editAlert: updateAlert.mutate,
     removeAlert: deleteAlert.mutate,
+    refetch,
   };
 }

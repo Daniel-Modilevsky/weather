@@ -17,8 +17,8 @@ const PARAMETERS = [
 ];
 
 const CONDITIONS = [
-  { value: "greaterThan", label: "Greater than" },
-  { value: "lessThan", label: "Less than" },
+  { value: "greater_than", label: "Greater than" },
+  { value: "less_than", label: "Less than" },
   { value: "equals", label: "Equals" },
 ];
 

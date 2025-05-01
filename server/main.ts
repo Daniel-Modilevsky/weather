@@ -6,25 +6,33 @@ import dotenv from "dotenv";
 import logger from "./lib/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFoundHandler";
+import { initAlertProducer } from "./queues/alertProducer";
 
 dotenv.config();
 
-const app = express();
-const PORT = 3001;
+async function startServer() {
+  const app = express();
+  const PORT = 3001;
 
-app.use(cors());
-app.use(express.json());
+  app.use(cors());
+  app.use(express.json());
 
-app.use("/api/alerts", alertsRoutes);
-app.get("/health", (_, res) => {
-  res.json({ status: "ok" });
-});
+  app.use("/api/alerts", alertsRoutes);
+  app.use("/api/weather", weatherRoutes);
+  app.get("/health", (_, res) => {
+    res.json({ status: "ok" });
+  });
 
-app.use("/api/weather", weatherRoutes);
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+  await initAlertProducer();
 
-app.listen(PORT, () => {
-  logger.info(`🚀 Server is running on http://localhost:${PORT}`);
+  app.listen(PORT, () => {
+    logger.info(`Server is running on http://localhost:${PORT}`);
+  });
+}
+
+startServer().catch((err) => {
+  logger.error("Failed to start server", err);
 });

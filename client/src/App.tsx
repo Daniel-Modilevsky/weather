@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { HomePage } from "./pages/Home";
 import { AlertsPage } from "./pages/Alert";
-import { AlertStatusPage } from "./pages/Status";
+import { AlertStatusPage } from "./pages/AlertStatusPage";
 import { NotFoundPage } from "./pages/NotFound";
 import Layout from "./layout/Layout";
 

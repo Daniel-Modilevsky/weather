@@ -6,6 +6,7 @@ import {
   deleteAlert,
 } from "../controllers/alerts";
 import { AlertInputSchema } from "../schemas/alert";
+import { alertCheckProducer } from "../queues/alertProducer";
 
 const router: Router = Router();
 
@@ -37,6 +38,28 @@ router.delete("/:id", (req: Request, res: Response) => {
   const { id } = req.params;
   const deleted = deleteAlert(id);
   res.json({ success: deleted });
+});
+
+router.post("/check-all", async (_req: Request, res: Response) => {
+  const alerts = getAlerts();
+  let published = 0;
+  let failed = 0;
+
+  for (const alert of alerts) {
+    try {
+      await alertCheckProducer.publish(alert);
+      published++;
+    } catch (err) {
+      console.error(`Failed to enqueue alert ${alert.id}`, err);
+      failed++;
+    }
+  }
+
+  res.json({
+    total: alerts.length,
+    published,
+    failed,
+  });
 });
 
 export default router;

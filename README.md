@@ -5,6 +5,11 @@
 cd client
 npm run dev
 
+# Server
+
 cd server
-node index.js
 npm run dev
+
+# Worker
+
+cd worker

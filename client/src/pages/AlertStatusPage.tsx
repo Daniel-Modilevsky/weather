@@ -1,5 +1,5 @@
 import { useAlerts } from "../hooks/useAlerts";
-import { Typography, Button } from "@mui/material";
+import { Typography, Button, CircularProgress } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useMemo } from "react";
 import {
@@ -11,9 +11,11 @@ import {
   Section,
   StatusCard,
 } from "./styles/Status.styles";
+import { useCheckAllAlerts } from "../hooks/useCheckAllAlerts";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 export function AlertStatusPage() {
-  const { alerts } = useAlerts();
+  const { alerts, refetch } = useAlerts();
 
   const triggered = useMemo(
     () => alerts.filter((a) => a.state === "triggered"),
@@ -30,6 +32,13 @@ export function AlertStatusPage() {
     return new Date(max).toLocaleTimeString();
   }, [alerts]);
 
+  const {
+    mutate: checkAll,
+    data: result,
+    isPending,
+    isSuccess,
+  } = useCheckAllAlerts(refetch);
+
   return (
     <PageWrapper>
       <HeaderContainer>
@@ -45,8 +54,10 @@ export function AlertStatusPage() {
           variant="outlined"
           size="small"
           style={{ height: 30, alignSelf: "center" }}
+          onClick={() => checkAll()}
+          disabled={isPending}
         >
-          Check Now
+          {isPending ? <CircularProgress size={18} /> : "Check Now"}
         </Button>
       </HeaderContainer>
 
@@ -66,7 +77,22 @@ export function AlertStatusPage() {
           Last updated: {lastUpdated} • Checking every 10 minutes
         </Typography>
       </StatusCard>
-
+      {isSuccess && (
+        <StatusCard>
+          <CheckCircleIcon color="success" fontSize="large" />
+          <Typography variant="h6" fontWeight={600} mt={1}>
+            Alerts Checked
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {result.published}/{result.total} processed
+          </Typography>
+          {result.failed > 0 && (
+            <Typography color="error" mt={1}>
+              ⚠ {result.failed} failed
+            </Typography>
+          )}
+        </StatusCard>
+      )}
       {triggered.length > 0 && (
         <Section>
           <Typography variant="subtitle1" fontWeight={600} color="error">

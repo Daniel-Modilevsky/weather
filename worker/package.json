@@ -1,0 +1,19 @@
+{
+  "name": "weather-worker",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "ts-node-dev --respawn main.ts"
+  },
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.7",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}
