@@ -36,7 +36,8 @@ const getAlertIcon = (parameter: string) => {
 };
 
 export function AlertStatusPage() {
-  const { alerts, refetch } = useAlerts();
+  const { alerts } = useAlerts();
+  const { checkAll, isChecking, evaluationStatus } = useCheckAllAlerts();
 
   const triggered = useMemo(
     () => alerts.filter((a) => a.state === "triggered"),
@@ -52,13 +53,6 @@ export function AlertStatusPage() {
     const max = Math.max(...timestamps);
     return new Date(max).toLocaleTimeString();
   }, [alerts]);
-
-  const {
-    mutate: checkAll,
-    data: result,
-    isPending,
-    isSuccess,
-  } = useCheckAllAlerts(refetch);
 
   return (
     <PageWrapper>
@@ -76,8 +70,8 @@ export function AlertStatusPage() {
           size="small"
           color="primary"
           onClick={() => checkAll()}
-          disabled={isPending}
-          startIcon={isPending ? <CircularProgress size={16} /> : null}
+          disabled={isChecking}
+          startIcon={isChecking ? <CircularProgress size={16} /> : null}
         >
           Check Now
         </Button>
@@ -119,20 +113,35 @@ export function AlertStatusPage() {
         </Typography>
       </StatusCard>
 
-      {isSuccess && result && (
+      {evaluationStatus && (
         <StatusCard>
-          <CheckCircleIcon color="success" fontSize="large" />
+          <CheckCircleIcon
+            color={evaluationStatus.done === "true" ? "success" : "info"}
+            fontSize="large"
+          />
           <Typography variant="h6" fontWeight={600} mt={1}>
-            Alerts Checked
+            {evaluationStatus.done === "true"
+              ? "Alerts Checked"
+              : "Checking Alerts..."}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {result.processed}/{result.total} processed
+            {evaluationStatus.processed}/{evaluationStatus.total} processed
           </Typography>
-          {result.failed > 0 && (
+          {evaluationStatus.failed > 0 && (
             <Typography color="error" mt={1}>
-              ⚠ {result.failed} failed
+              ⚠ {evaluationStatus.failed} failed
             </Typography>
           )}
+          {evaluationStatus.failedAlerts?.map((alert) => (
+            <Typography
+              key={alert.id}
+              variant="caption"
+              color="error.light"
+              mt={0.5}
+            >
+              {alert.name}: {alert.error}
+            </Typography>
+          ))}
         </StatusCard>
       )}
 
