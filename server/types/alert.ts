@@ -19,10 +19,11 @@ export type Alert = {
 };
 
 export type AlertInput = {
-  condition: "greater_than" | "less_than" | "equal_to";
-  threshold: number;
   name: string;
+  location: string;
   latitude: number;
   longitude: number;
   parameter: string;
+  condition: "greater_than" | "less_than" | "equal_to";
+  threshold: number;
 };

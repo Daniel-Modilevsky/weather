@@ -4,62 +4,27 @@ import {
   createAlert,
   updateAlert,
   deleteAlert,
+  checkAllAlerts,
 } from "../controllers/alerts";
-import { AlertInputSchema } from "../schemas/alert";
-import { alertCheckProducer } from "../queues/alertProducer";
 
 const router: Router = Router();
 
-router.get("/", (_req: Request, res: Response) => {
-  const alerts = getAlerts();
-  res.json(alerts);
-});
+const asyncHandler =
+  (fn: (req: Request, res: Response) => Promise<any>) =>
+  (req: Request, res: Response) => {
+    Promise.resolve(fn(req, res)).catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+  };
 
-router.post("/", (req: Request, res: Response) => {
-  try {
-    const parsed = AlertInputSchema.parse(req.body);
-    const newAlert = createAlert(parsed);
-    res.status(201).json(newAlert);
-  } catch (error) {
-    res.status(400).json({ error: "Invalid alert data" });
-  }
-});
+router.get("/", asyncHandler(getAlerts));
 
-router.put("/:id", (req: any, res: any) => {
-  const { id } = req.params;
-  const updated = updateAlert(id, req.body);
-  if (!updated) {
-    return res.status(404).json({ error: "Alert not found" });
-  }
-  res.json(updated);
-});
+router.post("/", asyncHandler(createAlert));
 
-router.delete("/:id", (req: Request, res: Response) => {
-  const { id } = req.params;
-  const deleted = deleteAlert(id);
-  res.json({ success: deleted });
-});
+router.put("/:id", asyncHandler(updateAlert));
 
-router.post("/check-all", async (_req: Request, res: Response) => {
-  const alerts = getAlerts();
-  let published = 0;
-  let failed = 0;
+router.delete("/:id", asyncHandler(deleteAlert));
 
-  for (const alert of alerts) {
-    try {
-      await alertCheckProducer.publish(alert);
-      published++;
-    } catch (err) {
-      console.error(`Failed to enqueue alert ${alert.id}`, err);
-      failed++;
-    }
-  }
-
-  res.json({
-    total: alerts.length,
-    published,
-    failed,
-  });
-});
+router.post("/check-all", asyncHandler(checkAllAlerts));
 
 export default router;

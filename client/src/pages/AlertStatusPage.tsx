@@ -1,5 +1,5 @@
 import { useAlerts } from "../hooks/useAlerts";
-import { Typography, Button, CircularProgress } from "@mui/material";
+import { Typography, Button, CircularProgress, Box } from "@mui/material";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { useMemo } from "react";
 import {
@@ -10,9 +10,30 @@ import {
   PageWrapper,
   Section,
   StatusCard,
+  SummaryBar,
+  AlertMessage,
 } from "./styles/Status.styles";
 import { useCheckAllAlerts } from "../hooks/useCheckAllAlerts";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WbSunnyIcon from "@mui/icons-material/WbSunny";
+import AirIcon from "@mui/icons-material/Air";
+import WaterDropIcon from "@mui/icons-material/WaterDrop";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+
+const getAlertIcon = (parameter: string) => {
+  switch (parameter.toLowerCase()) {
+    case "temperature":
+      return <WbSunnyIcon />;
+    case "windspeed":
+      return <AirIcon />;
+    case "precipitation":
+      return <WaterDropIcon />;
+    case "visibility":
+      return <VisibilityIcon />;
+    default:
+      return <WarningAmberIcon />;
+  }
+};
 
 export function AlertStatusPage() {
   const { alerts, refetch } = useAlerts();
@@ -51,21 +72,41 @@ export function AlertStatusPage() {
           </Typography>
         </div>
         <Button
-          variant="outlined"
+          variant="contained"
           size="small"
-          style={{ height: 30, alignSelf: "center" }}
+          color="primary"
           onClick={() => checkAll()}
           disabled={isPending}
+          startIcon={isPending ? <CircularProgress size={16} /> : null}
         >
-          {isPending ? <CircularProgress size={18} /> : "Check Now"}
+          Check Now
         </Button>
       </HeaderContainer>
 
+      <SummaryBar>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Typography variant="body1" color="error.main">
+            {triggered.length} Triggered
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            |
+          </Typography>
+          <Typography variant="body1" color="success.main">
+            {clear.length} Clear
+          </Typography>
+        </Box>
+      </SummaryBar>
+
       <StatusCard>
-        <WarningAmberIcon fontSize="large" color="error" />
+        <WarningAmberIcon
+          fontSize="large"
+          color={triggered.length > 0 ? "error" : "success"}
+        />
         <Typography variant="h6" fontWeight={600} mt={1}>
           {triggered.length > 0
-            ? `${triggered.length} Alerts Triggered`
+            ? `${triggered.length} Alert${
+                triggered.length > 1 ? "s" : ""
+              } Triggered`
             : "All Clear"}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -77,14 +118,15 @@ export function AlertStatusPage() {
           Last updated: {lastUpdated} • Checking every 10 minutes
         </Typography>
       </StatusCard>
-      {isSuccess && (
+
+      {isSuccess && result && (
         <StatusCard>
           <CheckCircleIcon color="success" fontSize="large" />
           <Typography variant="h6" fontWeight={600} mt={1}>
             Alerts Checked
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {result.published}/{result.total} processed
+            {result.processed}/{result.total} processed
           </Typography>
           {result.failed > 0 && (
             <Typography color="error" mt={1}>
@@ -93,6 +135,7 @@ export function AlertStatusPage() {
           )}
         </StatusCard>
       )}
+
       {triggered.length > 0 && (
         <Section>
           <Typography variant="subtitle1" fontWeight={600} color="error">
@@ -101,7 +144,10 @@ export function AlertStatusPage() {
           <AlertsContainer>
             {triggered.map((alert) => (
               <AlertCard key={alert.id} type="triggered">
-                <Typography fontWeight={600}>{alert.name}</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  {getAlertIcon(alert.parameter)}
+                  <Typography fontWeight={600}>{alert.name}</Typography>
+                </Box>
                 <Meta>{alert.location}</Meta>
                 <Meta>
                   {alert.parameter} is {alert.condition} {alert.threshold}
@@ -110,6 +156,7 @@ export function AlertStatusPage() {
                 <Meta>
                   Checked: {new Date(alert.lastChecked).toLocaleTimeString()}
                 </Meta>
+                <AlertMessage>Alert condition has been triggered!</AlertMessage>
               </AlertCard>
             ))}
           </AlertsContainer>
@@ -124,7 +171,10 @@ export function AlertStatusPage() {
           <AlertsContainer>
             {clear.map((alert) => (
               <AlertCard key={alert.id} type="clear">
-                <Typography fontWeight={600}>{alert.name}</Typography>
+                <Box display="flex" alignItems="center" gap={1}>
+                  {getAlertIcon(alert.parameter)}
+                  <Typography fontWeight={600}>{alert.name}</Typography>
+                </Box>
                 <Meta>{alert.location}</Meta>
                 <Meta>
                   {alert.parameter} is {alert.condition} {alert.threshold}
