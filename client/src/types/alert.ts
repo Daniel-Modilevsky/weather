@@ -1,13 +1,3 @@
-export type AlertCondition = "greaterThan" | "lessThan" | "equals";
-
-export type AlertParameter =
-  | "temperature"
-  | "precipitation"
-  | "windSpeed"
-  | "humidity"
-  | "uvIndex"
-  | "visibility";
-
 export type AlertState =
   | "clear"
   | "triggered"
