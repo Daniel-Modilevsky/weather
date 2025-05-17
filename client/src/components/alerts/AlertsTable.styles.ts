@@ -1,4 +1,3 @@
-// src/components/alerts/AlertsTable.styles.ts
 import styled from "styled-components";
 import { TableCell, Chip } from "@mui/material";
 

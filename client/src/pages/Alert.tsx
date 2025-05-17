@@ -34,7 +34,7 @@ export function AlertsPage() {
 
   const [showModal, setShowModal] = useState(false);
   const [alertToDelete, setAlertToDelete] = useState<Alert | null>(null);
-  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null); // 💡 Local state
+  const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
 
   const handleCloseModal = () => {
     setShowModal(false);

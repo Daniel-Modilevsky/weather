@@ -70,6 +70,7 @@ services:
       - POSTGRES_DB=weather
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - WEATHER_API_URL=https://api.weatherapi.com/v1
     volumes:
       - ./worker/logs:/app/logs
     depends_on:

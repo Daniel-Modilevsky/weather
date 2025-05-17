@@ -14,7 +14,6 @@ const testPool = new Pool({
 
 describe("Alerts API", () => {
   beforeAll(async () => {
-    // Clear test database
     await testPool.query("DELETE FROM alerts");
   });
 
@@ -76,7 +75,7 @@ describe("Alerts API", () => {
         location: "Test Location",
         parameter: "temperature",
         condition: "greater_than",
-        threshold: 1000, // Too high for temperature
+        threshold: 1000,
         latitude: 32.0853,
         longitude: 34.7818,
       };

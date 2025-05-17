@@ -16,7 +16,6 @@ async function runMigrations() {
   try {
     await client.query("BEGIN");
 
-    // Read and execute each migration file
     const migrationsDir = path.join(__dirname, "../migrations");
     const files = fs.readdirSync(migrationsDir).sort();
 

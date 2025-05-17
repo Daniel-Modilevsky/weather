@@ -21,7 +21,6 @@ app.use(express.json());
 app.use("/api/alerts", alertsRoutes);
 app.use("/api/weather", weatherRoutes);
 
-// Initialize RabbitMQ producer
 initAlertProducer().catch((err: Error) => {
   logger.error("Failed to initialize RabbitMQ producer", err);
   process.exit(1);

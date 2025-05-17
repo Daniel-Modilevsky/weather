@@ -1,25 +1,24 @@
 import { createTheme } from "@mui/material/styles";
 
-// Create a theme instance.
 const theme = createTheme({
   palette: {
     mode: "light",
     background: {
-      default: "#f9fafb", // Light gray background for body
-      paper: "#ffffff", // White for cards and papers
+      default: "#f9fafb",
+      paper: "#ffffff",
     },
     primary: {
-      main: "#2563eb", // Nice blue color (close to Tailwind "blue-600")
+      main: "#2563eb",
     },
     secondary: {
-      main: "#64748b", // Grayish blue
+      main: "#64748b",
     },
     error: {
-      main: "#dc2626", // Red-600
+      main: "#dc2626",
     },
     text: {
-      primary: "#111827", // Gray-900
-      secondary: "#6b7280", // Gray-500
+      primary: "#111827",
+      secondary: "#6b7280",
     },
   },
   typography: {

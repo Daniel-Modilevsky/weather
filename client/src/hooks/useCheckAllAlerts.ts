@@ -32,7 +32,6 @@ export function useCheckAllAlerts() {
       return res.json();
     },
     onSuccess: (data) => {
-      // Start polling for evaluation status
       const interval = setInterval(async () => {
         try {
           const res = await fetch(
@@ -42,7 +41,6 @@ export function useCheckAllAlerts() {
           const status = await res.json();
           setEvaluationStatus(status);
 
-          // If evaluation is complete, stop polling and refetch alerts
           if (status.done === "true") {
             if (pollingInterval) {
               clearInterval(pollingInterval);
@@ -53,13 +51,12 @@ export function useCheckAllAlerts() {
         } catch (error) {
           console.error("Failed to fetch evaluation status:", error);
         }
-      }, 1000); // Poll every second
+      }, 1000);
 
       setPollingInterval(interval);
     },
   });
 
-  // Cleanup polling interval on unmount
   useEffect(() => {
     return () => {
       if (pollingInterval) {
